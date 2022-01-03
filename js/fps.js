@@ -27,7 +27,7 @@ export default class FPS {
     }
 
     render(ctx, fontSize, x, y) {
-        ctx.fillStyle = 'White';
+        ctx.fillStyle = '#502020';
         ctx.font = `${fontSize}px Monospace`;
         ctx.fillText(this.#fpsRateMessage, x, y + fontSize)
     }
