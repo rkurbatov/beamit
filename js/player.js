@@ -8,6 +8,7 @@ export default class Player {
     #status = {
         moving: 'stop',
         rotating: 'stop',
+        running: false,
     };
     #rotationSpeed;
     #movementSpeed;
@@ -44,9 +45,10 @@ export default class Player {
         const isMoving = this.#status.moving !== 'stop'
         if (isMoving) {
             const k = this.#status.moving === 'forward' ? +1 : -1
+            const runK = this.#status.moving === 'forward' && this.#status.running ? 1.75 : 1;
 
-            const playerOffsetX = Math.sin(this.angle) * k * this.#movementSpeed;
-            const playerOffsetY = Math.cos(this.angle) * k * this.#movementSpeed;
+            const playerOffsetX = Math.sin(this.angle) * k * this.#movementSpeed * runK;
+            const playerOffsetY = Math.cos(this.angle) * k * this.#movementSpeed * runK;
 
             const targetCellX =
                 Math.floor(this.y / this.#cellSize) * this.#map.width
@@ -85,6 +87,9 @@ export default class Player {
             case "ArrowUp":
                 this.#status.moving = 'forward';
                 break;
+            case "ShiftLeft":
+                this.#status.running = true;
+                break;
         }
     }
 
@@ -97,6 +102,9 @@ export default class Player {
             case "ArrowDown":
             case "ArrowUp":
                 this.#status.moving = 'stop';
+                break;
+            case "ShiftLeft":
+                this.#status.running = false;
                 break;
         }
     }
