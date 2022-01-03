@@ -23,6 +23,8 @@ function gameLoop(screen, map, player, fpsCounter) {
     screen.resizeCanvas();
     screen.render();
 
+    player.updatePosition();
+
     // draw minimap
     map.renderMinimap(player, screen.ctx)
 

@@ -35,14 +35,14 @@ export default class GameMap {
         // Draw player
         ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(playerMapX, playerMapY, 2, 0, 2 * Math.PI);
+        ctx.arc(playerMapX, playerMapY, 1, 0, 2 * Math.PI);
         ctx.fill();
 
         ctx.strokeStyle = `rgba(255, 0, 0, ${opacity})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(playerMapX, playerMapY);
-        ctx.lineTo(playerMapX + Math.sin(player.angle) * 5, playerMapY + Math.cos(player.angle) * 5);
+        ctx.lineTo(playerMapX + Math.sin(player.angle) * 3, playerMapY + Math.cos(player.angle) * 3);
         ctx.stroke();
     }
 
