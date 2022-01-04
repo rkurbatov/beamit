@@ -2,16 +2,16 @@ export default class GameMap {
     #mapArea;
     #mapWidth;
     #mapHeight;
+    #cellSize;
 
-    static cellSize = 10;
-
-    constructor(mapData) {
+    constructor(mapData, cellSize) {
         this.#mapArea = mapData.area;
         this.#mapWidth = mapData.width;
         this.#mapHeight = mapData.height;
+        this.#cellSize = cellSize;
     }
 
-    renderMinimap(player, ctx, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.85) {
+    render(ctx, player, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.85) {
         for (let row = 0; row < this.#mapHeight; row++) {
             for (let col = 0; col < this.#mapWidth; col++) {
                 const elIdx = row * this.#mapWidth + col;
@@ -21,10 +21,10 @@ export default class GameMap {
                     ctx.fillStyle = `rgba(150, 150, 150, ${opacity})`;
                 }
                 ctx.fillRect(
-                    mapOffsetX + col * GameMap.cellSize,
-                    mapOffsetY + row * GameMap.cellSize,
-                    GameMap.cellSize,
-                    GameMap.cellSize,
+                    mapOffsetX + col * this.#cellSize,
+                    mapOffsetY + row * this.#cellSize,
+                    this.#cellSize,
+                    this.#cellSize,
                 );
             }
         }

@@ -4,7 +4,7 @@ export default class GameScreen {
     #screenWidth;
     #screenHeight;
 
-    constructor(canvasEl, screenWidth = 320, screenHeight = 200) {
+    constructor(canvasEl, screenWidth, screenHeight) {
         this.#canvasEl = canvasEl;
         this.#canvasCtx = canvasEl.getContext('2d');
         this.#screenWidth = screenWidth;

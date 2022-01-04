@@ -5,7 +5,7 @@ export default class FPS {
     #cycleCount = 0;
     #fpsRateMessage = '...';  // Measured FPS
 
-    constructor(fpsRate = 60) {
+    constructor(fpsRate) {
         this.#fpsRate = fpsRate;
         this.#cycleDelay = Math.floor(1000 / fpsRate);
     }
@@ -26,7 +26,7 @@ export default class FPS {
 
     }
 
-    render(ctx, fontSize, x, y) {
+    render(ctx, x = 0, y = 0, fontSize = 10) {
         ctx.fillStyle = '#502020';
         ctx.font = `${fontSize}px Monospace`;
         ctx.fillText(this.#fpsRateMessage, x, y + fontSize)
