@@ -7,7 +7,7 @@ window.onload = async function () {
 }
 
 function gameLoop(gameInstance) {
-    const { fpsCounter, screen, player, map} = gameInstance;
+    const { fpsCounter, screen, player, map, camera} = gameInstance;
 
     fpsCounter.tick();
 
@@ -16,7 +16,7 @@ function gameLoop(gameInstance) {
 
     player.updatePosition();
 
-    map.render(screen.ctx, player);
+    map.render(screen.ctx, player, camera);
     fpsCounter.render(screen.ctx);
 
     // Make the infinite loop
