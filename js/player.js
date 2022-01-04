@@ -9,9 +9,13 @@ export default class Player {
         moving: 'stop',
         rotating: 'stop',
         running: false,
+        strafing: false,
     };
+
     #rotationSpeed;
     #movementSpeed;
+    #runSpeed;
+    #strafeSpeed;
 
     constructor(map, cellSize) {
         this.#map = map;
@@ -24,6 +28,8 @@ export default class Player {
 
         this.#rotationSpeed = 0.03;
         this.#movementSpeed = cellSize / 20;
+        this.#runSpeed = this.#movementSpeed * 1.75;
+        this.#strafeSpeed = this.#movementSpeed / 1.5;
 
         document.onkeydown = this.#onKeyDown.bind(this);
         document.onkeyup = this.#onKeyUp.bind(this);
@@ -41,14 +47,30 @@ export default class Player {
         return this.#angle;
     }
 
-    updatePosition() {
-        const isMoving = this.#status.moving !== 'stop'
-        if (isMoving) {
-            const k = this.#status.moving === 'forward' ? +1 : -1
-            const runK = this.#status.moving === 'forward' && this.#status.running ? 1.75 : 1;
+    // Calculates movement offsets for front/back movements or side strafing.
+    #getOffsets(isMoving) {
+        let k, angle;
 
-            const playerOffsetX = Math.sin(this.angle) * k * this.#movementSpeed * runK;
-            const playerOffsetY = Math.cos(this.angle) * k * this.#movementSpeed * runK;
+        if (isMoving) {
+            const speed = this.#status.moving === 'forward' && this.#status.running
+                ? this.#runSpeed
+                : this.#movementSpeed;
+            k = (this.#status.moving === 'forward' ? +1 : -1) * speed;
+            angle = this.angle;
+        } else {
+            k = (this.#status.rotating === 'left' ? +1 : -1) * this.#strafeSpeed;
+            angle = this.angle + Math.PI / 2; // Strafing is moving with 90 deg. rotation angle
+        }
+
+        return [Math.sin(angle) * k, Math.cos(angle) * k];
+    }
+
+    updatePosition() {
+        const isMoving = this.#status.moving !== 'stop';
+        const isStrafing = this.#status.rotating !== 'stop' && this.#status.strafing
+
+        if (isMoving || isStrafing) {
+            const [playerOffsetX, playerOffsetY] = this.#getOffsets(isMoving);
 
             const targetCellX =
                 Math.floor(this.y / this.#cellSize) * this.#map.width
@@ -66,10 +88,10 @@ export default class Player {
             if (canStepOnY) this.#y += playerOffsetY
         }
 
-        const isRotating = this.#status.rotating !== 'stop'
+        const isRotating = this.#status.rotating !== 'stop' && !this.#status.strafing
         if (isRotating) {
             const k = this.#status.rotating === 'left' ? +1 : -1
-            this.#angle += k * this.#rotationSpeed;
+            this.#angle = Player.#normalize(this.#angle + k * this.#rotationSpeed);
         }
     }
 
@@ -90,6 +112,9 @@ export default class Player {
             case "ShiftLeft":
                 this.#status.running = true;
                 break;
+            case "AltLeft":
+                this.#status.strafing = true;
+                break;
         }
     }
 
@@ -106,6 +131,16 @@ export default class Player {
             case "ShiftLeft":
                 this.#status.running = false;
                 break;
+            case "AltLeft":
+                this.#status.strafing = false;
+                break;
         }
+    }
+
+    static #TWO_PI = Math.PI * 2;
+
+    // Normalize angle value between -π and π
+    static #normalize (angle) {
+        return angle - Player.#TWO_PI * Math.floor((angle + Math.PI) / Player.#TWO_PI);
     }
 }
