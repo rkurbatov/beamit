@@ -8,10 +8,10 @@ const {default: mapData} = await import('../levels/level1.json', { assert: { typ
 
 export default function initGame(options) {
     const gameOptions = {
-        screenWidth: 320,
-        screenHeight: 200,
+        screenWidth: 800,
+        screenHeight: 480,
         fpsRate: 60,
-        cellSize: 10,
+        cellSize: 5,
         ...options,
     }
 

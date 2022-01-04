@@ -38,4 +38,8 @@ export default class GameScreen {
     get ctx() {
         return this.#canvasCtx;
     }
+
+    get offset() {
+        return (this.#canvasEl.width - this.#screenWidth) / 2;
+    }
 }

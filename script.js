@@ -16,7 +16,10 @@ function gameLoop(gameInstance) {
 
     player.updatePosition();
 
-    map.render(screen.ctx, player, camera);
+    const castResult = camera.rayCast(player);
+
+    map.renderWorld(screen.ctx, castResult, screen.offset);
+    map.render(screen.ctx, player, camera, castResult);
     fpsCounter.render(screen.ctx);
 
     // Make the infinite loop

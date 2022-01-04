@@ -11,7 +11,14 @@ export default class GameMap {
         this.#cellSize = cellSize;
     }
 
-    render(ctx, player, camera, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.5) {
+    renderWorld(ctx, castResult, offset) {
+        castResult.forEach(({rayX: endX, rayY: endY, wallHeight, fillStyle}, ray) => {
+            ctx.fillStyle = fillStyle;
+            ctx.fillRect(offset + ray, (480 - wallHeight)/2, 1, wallHeight);
+        })
+    }
+
+    render(ctx, player, camera, castResult, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.25) {
         for (let row = 0; row < this.#mapHeight; row++) {
             for (let col = 0; col < this.#mapWidth; col++) {
                 const elIdx = row * this.#mapWidth + col;
@@ -46,10 +53,9 @@ export default class GameMap {
         ctx.stroke();
 
 
-        // Draw horizontal ray
         ctx.strokeStyle = `rgba(255, 255, 0, 0.02)`;
         ctx.lineWidth = 1;
-        camera.rayCast(player).forEach(({rayX: endX, rayY: endY}) => {
+        castResult.forEach(({rayX: endX, rayY: endY, wallHeight, fillStyle}, ray) => {
             ctx.beginPath();
             ctx.moveTo(playerMapX, playerMapY);
             ctx.lineTo(endX + mapOffsetX, endY + mapOffsetY);

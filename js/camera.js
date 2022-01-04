@@ -69,10 +69,14 @@ export default class Camera {
             horRayEndY += dY;
         }
 
+        const k = Math.cos(player.angle - angle); // Avoid fisheye effect
+        const depth = (Math.min(verticalDepth, horizontalDepth) || Number.EPSILON) * k;
+        const wallHeight = Math.min(this.#cellSize * 1200 / depth, 480);
+
         if (verticalDepth < horizontalDepth) {
-            return { rayX: vertRayEndX, rayY: vertRayEndY, depth: verticalDepth };
+            return { rayX: vertRayEndX, rayY: vertRayEndY, wallHeight, fillStyle: '#aaa' };
         } else {
-            return { rayX: horRayEndX, rayY: horRayEndY, depth: horizontalDepth };
+            return { rayX: horRayEndX, rayY: horRayEndY, wallHeight, fillStyle: '#555' };
         }
     }
 }
