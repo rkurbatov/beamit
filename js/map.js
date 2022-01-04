@@ -11,7 +11,7 @@ export default class GameMap {
         this.#cellSize = cellSize;
     }
 
-    render(ctx, player, camera, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.85) {
+    render(ctx, player, camera, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.5) {
         for (let row = 0; row < this.#mapHeight; row++) {
             for (let col = 0; col < this.#mapWidth; col++) {
                 const elIdx = row * this.#mapWidth + col;
@@ -49,7 +49,7 @@ export default class GameMap {
         // Draw horizontal ray
         ctx.strokeStyle = `rgba(255, 255, 0, 0.02)`;
         ctx.lineWidth = 1;
-        camera.rayCast(player).forEach(([endX, endY]) => {
+        camera.rayCast(player).forEach(({rayX: endX, rayY: endY}) => {
             ctx.beginPath();
             ctx.moveTo(playerMapX, playerMapY);
             ctx.lineTo(endX + mapOffsetX, endY + mapOffsetY);

@@ -69,9 +69,10 @@ export default class Camera {
             horRayEndY += dY;
         }
 
-        const endX = verticalDepth < horizontalDepth ? vertRayEndX : horRayEndX;
-        const endY = verticalDepth < horizontalDepth ? vertRayEndY : horRayEndY;
-
-        return [endX, endY];
+        if (verticalDepth < horizontalDepth) {
+            return { rayX: vertRayEndX, rayY: vertRayEndY, depth: verticalDepth };
+        } else {
+            return { rayX: horRayEndX, rayY: horRayEndY, depth: horizontalDepth };
+        }
     }
 }
