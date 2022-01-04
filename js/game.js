@@ -10,7 +10,7 @@ export default function initGame(options) {
         screenWidth: 320,
         screenHeight: 200,
         fpsRate: 60,
-        cellSize: 5,
+        cellSize: 10,
         ...options,
     }
 
