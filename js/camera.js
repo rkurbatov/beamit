@@ -28,55 +28,68 @@ export default class Camera {
         return endCoords;
     }
 
+    // Find cell based on currently calculated intersection coordinates in map array
+    #checkCell(curX, curY, shouldDecreaseIdxX, shouldDecreaseIdxY) {
+        let xIdx = Math.floor(curX / this.#cellSize);
+        if (shouldDecreaseIdxX) xIdx--;
+
+        let yIdx = Math.floor(curY / this.#cellSize);
+        if (shouldDecreaseIdxY) yIdx--;
+
+        const idx = yIdx * this.#mapWidth + xIdx;
+        // Check if idx is within array borders and whether the cell is an obstacle to a ray
+        // Condition can be improved, for now 0 means empty space.
+        return idx > 0 && idx < this.#mapArea.length - 1 && this.#mapArea[idx] === 0;
+    }
+
+    // Based on variation of this algorithm: https://www.youtube.com/watch?v=NbSee-XM7WA
     #singleRayCast(player, angle) {
-        const curSin = Math.sin(angle) || Number.EPSILON;
+        const curSin = Math.sin(angle) || Number.EPSILON; // Prevents division by zero exception
         const curCos = Math.cos(angle) || Number.EPSILON;
 
-        // Vertical line intersection
-        const rayStartX = Math.floor(player.x / this.#cellSize) * this.#cellSize;
+        // The algorithm moves per one cell forwards or backwards depending on angle
         const dX = (curSin > 0 ? +1 : -1) * this.#cellSize;
-        let vertRayEndX = curSin > 0 ? rayStartX + this.#cellSize : rayStartX;
-        let vertRayEndY, verticalDepth;
-
-        // Modified Bresenham's line algorithm.
-        for (let offset = 0; offset < this.#mapWidth; offset++) {
-            verticalDepth = (vertRayEndX - player.x) / curSin;
-            vertRayEndY = player.y + verticalDepth * curCos;
-            let xIdx = Math.floor(vertRayEndX / this.#cellSize);
-            let yIdx = Math.floor(vertRayEndY / this.#cellSize);
-            if (curSin <= 0) xIdx--;
-            const idx = yIdx * this.#mapWidth + xIdx;
-            if (idx < 0 || idx >= this.#mapArea.length - 1) break;
-            if (this.#mapArea[idx] !== 0) break;
-            vertRayEndX += dX;
-        }
-
-        // Horizontal line intersection
-        const rayStartY = Math.floor(player.y / this.#cellSize) * this.#cellSize;
         const dY = (curCos > 0 ? +1 : -1) * this.#cellSize;
-        let horRayEndY = curCos > 0 ? rayStartY + this.#cellSize : rayStartY;
-        let horRayEndX, horizontalDepth;
 
-        for (let offset = 0; offset < this.#mapHeight; offset++) {
-            horizontalDepth = (horRayEndY - player.y) / curCos;
-            horRayEndX = player.x + horizontalDepth * curSin;
-            let xIdx = Math.floor(horRayEndX / this.#cellSize);
-            let yIdx = Math.floor(horRayEndY / this.#cellSize);
-            if (curCos <= 0) yIdx--;
-            const idx = yIdx * this.#mapWidth + xIdx;
-            if (idx < 0 || idx >= this.#mapArea.length - 1) break;
-            if (this.#mapArea[idx] !== 0) break;
-            horRayEndY += dY;
+        // Round function depends on the angle so the nearest intersection will be chosen correctly
+        const xRoundFunc = curSin > 0 ? Math.ceil : Math.floor
+        const yRoundFunc = curCos > 0 ? Math.ceil : Math.floor
+
+        // Initial ray end coordinates are set to the nearest cell border (the same or the next one depending on view angle)
+        let vertRayEndX = xRoundFunc(player.x / this.#cellSize) * this.#cellSize;
+        let horizRayEndY = yRoundFunc(player.y / this.#cellSize) * this.#cellSize;
+
+        let vertRayEndY, vertRayLength;
+        let horizRayEndX, horizRayLength;
+
+        // The amount of iterations is no more than the width of the map. We move 1 cell at a time horizontally
+        // and check if the target cell is a valid cell or an obstacle so we can stop the cycle. The length of the
+        // ray is calculated as a hypotenuse of a rectangular triangle with known side and sine.
+        for (let offset = 0; offset < this.#mapWidth; offset++) {
+            vertRayLength = (vertRayEndX - player.x) / curSin;
+            vertRayEndY = player.y + vertRayLength * curCos; // calculate another end point coordinate based on the new ray length
+            if (!this.#checkCell(vertRayEndX, vertRayEndY, curSin <= 0, false)) break;
+            vertRayEndX += dX; // Increase the first coordinate on +/- cellSize and continue
         }
 
-        const k = Math.cos(player.angle - angle); // Avoid fisheye effect
-        const depth = (Math.min(verticalDepth, horizontalDepth) || Number.EPSILON) * k;
-        const wallHeight = Math.min(this.#cellSize * 1200 / depth, 480);
+        // The same for the ray with vertical advancement
+        for (let offset = 0; offset < this.#mapHeight; offset++) {
+            horizRayLength = (horizRayEndY - player.y) / curCos;
+            horizRayEndX = player.x + horizRayLength * curSin;
+            if (!this.#checkCell(horizRayEndX, horizRayEndY, false, curCos <= 0)) break;
+            horizRayEndY += dY;
+        }
 
-        if (verticalDepth < horizontalDepth) {
-            return { rayX: vertRayEndX, rayY: vertRayEndY, wallHeight, fillStyle: '#aaa' };
+        // We need two rays because depending on map and angle one of them may not reach the obstacle to meet with.
+        // The real distance is the minimal of two ray lengths.
+        const distance = Math.min(vertRayLength, horizRayLength) || Number.EPSILON;
+        const k = Math.cos(player.angle - angle); // Coefficient to avoid fisheye effect
+        const wallHeight = Math.min(this.#cellSize * 1200 / (distance * k), 480);
+
+        if (vertRayLength < horizRayLength) {
+            return {rayX: vertRayEndX, rayY: vertRayEndY, wallHeight, fillStyle: '#aaa'};
         } else {
-            return { rayX: horRayEndX, rayY: horRayEndY, wallHeight, fillStyle: '#555' };
+            return {rayX: horizRayEndX, rayY: horizRayEndY, wallHeight, fillStyle: '#555'};
         }
     }
 }
