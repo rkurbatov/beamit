@@ -16,9 +16,9 @@ export default class GameMap {
 
     loadTextures() {
         this.#wallTexture = document.createElement('img');
-        this.#wallTexture.src = '../assets/wall.jpeg';
+        this.#wallTexture.src = './assets/wall.jpeg';
         this.#floorTexture = document.createElement('img');
-        this.#floorTexture.src = '../assets/floor.jpeg';
+        this.#floorTexture.src = './assets/floor.jpeg';
     }
 
     renderWorld(ctx, castResult, offset) {
