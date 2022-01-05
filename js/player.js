@@ -16,6 +16,7 @@ export default class Player {
     #movementSpeed;
     #runSpeed;
     #strafeSpeed;
+    #approachLimit;
 
     constructor(map, cellSize) {
         this.#map = map;
@@ -30,6 +31,8 @@ export default class Player {
         this.#movementSpeed = cellSize / 20;
         this.#runSpeed = this.#movementSpeed * 1.75;
         this.#strafeSpeed = this.#movementSpeed / 1.5;
+
+        this.#approachLimit = cellSize / 3;
 
         document.onkeydown = this.#onKeyDown.bind(this);
         document.onkeyup = this.#onKeyUp.bind(this);
@@ -62,7 +65,7 @@ export default class Player {
             angle = this.angle + Math.PI / 2; // Strafing is moving with 90 deg. rotation angle
         }
 
-        return [Math.sin(angle) * k, Math.cos(angle) * k];
+        return [Math.sin(angle) * k, Math.cos(angle) * k, this.#approachLimit];
     }
 
     updatePosition() {
@@ -72,13 +75,17 @@ export default class Player {
         if (isMoving || isStrafing) {
             const [playerOffsetX, playerOffsetY] = this.#getOffsets(isMoving);
 
+            // Approach limit - don't come closer than some value to reduce artifacts
+            const apprX = Math.sign(playerOffsetX) * this.#approachLimit;
+            const apprY = Math.sign(playerOffsetY) * this.#approachLimit;
+
             const targetCellX =
                 Math.floor(this.y / this.#cellSize) * this.#map.width
-                + Math.floor((this.x + playerOffsetX) / this.#cellSize);
+                + Math.floor((this.x + playerOffsetX + apprX) / this.#cellSize);
             const canStepOnX = this.#map.area[targetCellX] === 0
 
             const targetCellY =
-                Math.floor((this.y + playerOffsetY) / this.#cellSize) * this.#map.width
+                Math.floor((this.y + playerOffsetY + apprY) / this.#cellSize) * this.#map.width
                 + Math.floor(this.x / this.#cellSize);
             const canStepOnY = this.#map.area[targetCellY] === 0
 
