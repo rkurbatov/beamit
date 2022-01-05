@@ -84,12 +84,24 @@ export default class Camera {
         // The real distance is the minimal of two ray lengths.
         const distance = Math.min(vertRayLength, horizRayLength) || Number.EPSILON;
         const k = Math.cos(player.angle - angle); // Coefficient to avoid fisheye effect
-        const wallHeight = Math.min(this.#cellSize * 1200 / (distance * k), 480);
+        const wallHeight = Math.min(Math.floor(this.#cellSize * 1200 / (distance * k)), 480 * 100);
 
         if (vertRayLength < horizRayLength) {
-            return {rayX: vertRayEndX, rayY: vertRayEndY, wallHeight, fillStyle: '#aaa'};
+            return {
+                rayX: vertRayEndX,
+                rayY: vertRayEndY,
+                wallHeight,
+                textureOffset: Math.floor(vertRayEndY - Math.floor(vertRayEndY / this.#cellSize) * this.#cellSize),
+                verticalRay: true,
+            };
         } else {
-            return {rayX: horizRayEndX, rayY: horizRayEndY, wallHeight, fillStyle: '#555'};
+            return {
+                rayX: horizRayEndX,
+                rayY: horizRayEndY,
+                wallHeight,
+                textureOffset: Math.floor(horizRayEndX - Math.floor(horizRayEndX / this.#cellSize) * this.#cellSize),
+                verticalRay: false,
+            };
         }
     }
 }

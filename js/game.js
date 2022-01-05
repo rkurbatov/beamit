@@ -11,7 +11,7 @@ export default function initGame(options) {
         screenWidth: 800,
         screenHeight: 480,
         fpsRate: 60,
-        cellSize: 64,
+        cellSize: 663,
         ...options,
     }
 
@@ -20,6 +20,8 @@ export default function initGame(options) {
     const player = new Player(mapData, gameOptions.cellSize);
     const camera = new Camera(mapData, gameOptions.cellSize, gameOptions.screenWidth);
     const map = new GameMap(mapData, gameOptions.cellSize);
+
+    map.loadTextures();
 
     return {
         screen,

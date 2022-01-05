@@ -4,6 +4,9 @@ export default class GameMap {
     #mapHeight;
     #cellSize;
 
+    #wallTexture;
+    #floorTexture;
+
     constructor(mapData, cellSize) {
         this.#mapArea = mapData.area;
         this.#mapWidth = mapData.width;
@@ -11,14 +14,35 @@ export default class GameMap {
         this.#cellSize = cellSize;
     }
 
+    loadTextures() {
+        this.#wallTexture = document.createElement('img');
+        this.#wallTexture.src = '../assets/wall.jpeg';
+        this.#floorTexture = document.createElement('img');
+        this.#floorTexture.src = '../assets/floor.jpeg';
+    }
+
     renderWorld(ctx, castResult, offset) {
-        castResult.forEach(({rayX: endX, rayY: endY, wallHeight, fillStyle}, ray) => {
-            ctx.fillStyle = fillStyle;
-            ctx.fillRect(offset + ray, (480 - wallHeight)/2, 1, wallHeight);
+        ctx.fillStyle = 'rgba(0, 0, 15, 0.35)';
+        castResult.forEach(({rayX: endX, rayY: endY, wallHeight, verticalRay, textureOffset}, ray) => {
+            // Texturize
+            ctx.drawImage(
+                this.#wallTexture,
+                textureOffset,     // Source image X offset
+                0,     // Source image Y offset
+                1,   // Source image width
+                663,   // Source image height
+                offset + ray,     // Target image X offset
+                (480 - wallHeight)/2,     // Target image Y offset
+                1,   // Target image width
+                wallHeight    // Target image height
+            );
+            if (verticalRay) {
+                ctx.fillRect(offset + ray, (480 - wallHeight)/2, 1, wallHeight);
+            }
         })
     }
 
-    render(ctx, player, camera, castResult, mapOffsetX = 0, mapOffsetY = 0, mapScale = 0.1, opacity = 0.45) {
+    render(ctx, player, camera, castResult, mapOffsetX = 0, mapOffsetY = 0, mapScale = 0.01, opacity = 0.45) {
         for (let row = 0; row < this.#mapHeight; row++) {
             for (let col = 0; col < this.#mapWidth; col++) {
                 const elIdx = row * this.#mapWidth + col;
