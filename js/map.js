@@ -18,7 +18,7 @@ export default class GameMap {
         })
     }
 
-    render(ctx, player, camera, castResult, mapOffsetX = 0, mapOffsetY = 0, opacity = 0.25) {
+    render(ctx, player, camera, castResult, mapOffsetX = 0, mapOffsetY = 0, mapScale = 0.1, opacity = 0.45) {
         for (let row = 0; row < this.#mapHeight; row++) {
             for (let col = 0; col < this.#mapWidth; col++) {
                 const elIdx = row * this.#mapWidth + col;
@@ -28,16 +28,16 @@ export default class GameMap {
                     ctx.fillStyle = `rgba(150, 150, 150, ${opacity})`;
                 }
                 ctx.fillRect(
-                    mapOffsetX + col * this.#cellSize,
-                    mapOffsetY + row * this.#cellSize,
-                    this.#cellSize,
-                    this.#cellSize,
+                    mapOffsetX + col * this.#cellSize * mapScale,
+                    mapOffsetY + row * this.#cellSize * mapScale,
+                    this.#cellSize * mapScale,
+                    this.#cellSize * mapScale,
                 );
             }
         }
 
-        const playerMapX = mapOffsetX + player.x;
-        const playerMapY = mapOffsetY + player.y;
+        const playerMapX = (mapOffsetX + player.x) * mapScale;
+        const playerMapY = (mapOffsetY + player.y) * mapScale;
 
         // Draw player
         ctx.fillStyle = `rgba(255, 0, 0, ${opacity})`;
@@ -55,10 +55,10 @@ export default class GameMap {
 
         ctx.strokeStyle = `rgba(255, 255, 0, 0.02)`;
         ctx.lineWidth = 1;
-        castResult.forEach(({rayX: endX, rayY: endY, wallHeight, fillStyle}, ray) => {
+        castResult.forEach(({rayX: endX, rayY: endY}) => {
             ctx.beginPath();
             ctx.moveTo(playerMapX, playerMapY);
-            ctx.lineTo(endX + mapOffsetX, endY + mapOffsetY);
+            ctx.lineTo((endX + mapOffsetX) * mapScale, (endY + mapOffsetY) * mapScale);
             ctx.stroke();
         })
     }
